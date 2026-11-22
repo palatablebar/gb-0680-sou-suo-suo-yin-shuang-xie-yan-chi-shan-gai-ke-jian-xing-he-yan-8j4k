@@ -9,3 +9,5 @@ event_id唯一，doc_id文本保留。side为source或index；版本正整数按
 业务ID和超大整数按文本保形；Decimal参与数量金额计算，对外序列化为字符串。哨兵集合定义在app/values.py，缺失值不能当零。所有时间带UTC偏移，先转UTC比较，业务日按指定地区划分。区间统一[start,end)。重复业务键保留第一条、完全相同行计重复；值冲突行隔离且保留原值。空文件、全空白、仅表头分开拒绝。
 
 运行清单包括输入sha256、规则版本、参数、生成时刻与耗时。源行编号以CSV解析器的物理结束行号表示，引号内换行不增加记录数。输入超过4MB返回413，非法表头和类型返回422，失效版本复核返回409。
+
+关账交接单字段：doc_id、gate、visibility_state、responsibility（源端/索引端/未归责）、reason（依据或未归责原因）、source_at与visible_at（原始UTC时刻，缺侧为空）、delay_seconds、threshold_seconds、tombstone（源端最终操作为删除）、superseded_versions（被取代的迟到旧写版本）、_sources（来源行）。closed_at为关账时刻as_of；等待中与通过的文档不上交接单。

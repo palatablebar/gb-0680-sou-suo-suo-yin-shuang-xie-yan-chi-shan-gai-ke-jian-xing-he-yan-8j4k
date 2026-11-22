@@ -31,6 +31,13 @@
 | TRAP-09 | 超大版本 | JSON精度损失 | 文本序列化 | `app/values.py` | `tests/test_m2.py::test_large_version_precise` |
 | TRAP-13 | 删除后迟到旧写 | 文档复活 | 最大版本墓碑 | `app/modules/m3_versions/rules.py` | `tests/test_m3.py::test_tombstone_beats_late_old_write` |
 | TRAP-23 | 延迟阈值边界 | 多判延迟 | 等于阈值通过 | `app/modules/m5_latency/rules.py` | `tests/test_m5.py::test_threshold_equal_pass` |
+| TRAP-27 | 赶关账凑数定责 | 单端证据强落责任方 | 未归责+原因封存 | `app/closure.py` | `tests/test_closure.py::test_unattributed_keeps_reason_and_original_times` |
+| TRAP-28 | 迟到旧写重新归责已撤文档 | 交接单被旧写翻动 | 最终墓碑状态定责，旧写记已取代版本 | `app/closure.py` | `tests/test_closure.py::test_taken_down_not_reattributed_by_late_old_write` |
+| TRAP-29 | 重跑新增交接行或换责任方 | 交接单重复漂移 | 结论随批次事务封存，同源复用 | `app/pipeline.py` `app/store.py` | `tests/test_closure.py::test_rerun_adds_no_handover_rows_and_keeps_party` |
+
+## 关账口径
+
+以as_of为关账时刻按时落账，不等迟到证据。每篇超时文档（延迟/缺失/内容差异）落唯一交接行：两端时刻已核且一致但可见超预算归索引端；两端记录已核但版本/操作/内容分歧归索引端；索引版本高于源端已核版本归源端；缺失、删除未确认、孤儿索引只有单端记录，一律未归责并保留原因，不凑数。已撤文档按最终墓碑状态定责，迟到旧写只记为已取代版本。结论由最终状态确定性推导并随批次负载事务写入，复核只改批次状态不改结论；同源重跑复用原批次，不增行、不换责任方。`/parity`页面与证据导出经`closure_of`读同一份结论，原始时刻与未归责原因随行封存。
 
 ## 对账规则
 

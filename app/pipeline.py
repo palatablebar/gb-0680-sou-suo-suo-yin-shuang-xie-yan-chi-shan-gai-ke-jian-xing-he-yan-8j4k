@@ -4,6 +4,7 @@ from app.errors import DomainError
 from app.values import scalar
 from app.manifest import digest,manifest
 from app import store
+from app.closure import build_closure
 from app.modules.m1_streams.rules import evaluate as stage1
 from app.modules.m2_schema.rules import evaluate as stage2
 from app.modules.m3_versions.rules import evaluate as stage3
@@ -25,7 +26,9 @@ def calculate(raw,params=None,stop=6):
         result["cumulative_quarantine"]=list(context["quarantine"])
         context[MODULES[index][0]]=result
         stages.append(result)
-    return {"run_id":digest(raw,params)[:20],"stages":stages,"manifest":manifest(raw,params,started),"parameters":params}
+    result={"run_id":digest(raw,params)[:20],"stages":stages,"manifest":manifest(raw,params,started),"parameters":params}
+    if len(stages)>4: result["closure"]=build_closure(stages[4]["rows"],params)
+    return result
 def execute(raw,params=None):
     result=calculate(raw,params);return store.save(result["run_id"],result)
 def stage_preview(index,payload):

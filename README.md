@@ -25,6 +25,8 @@ docker compose exec -T app pytest -q
 
 按源版本重建目标可见状态，删除墓碑拦截迟到旧写入；延迟与缺失分开定责。
 
+关账口径：以as_of为关账时刻按时落账，每篇超时文档在`/parity`交接单落唯一结论。只凭核对过的两端时刻定责（源端/索引端）；晚到记录没到、只有单端证据时一律未归责并保留原因，不凑数。已撤文档按最终墓碑状态定责，迟到旧写只记为已取代版本。结论随批次事务封存，同源重跑不增行、不换责任方；页面与导出读同一份结论。
+
 ## 演示
 
 1. 打开首页，核对当次计算、差异和隔离原因。
@@ -36,7 +38,7 @@ docker compose exec -T app pytest -q
 
 输入列见 `docs/DATA-DICTIONARY.md`。项目包含dirty.csv、clean.csv、legacy.csv，统一走实际导入路径。上传限制4MB，拒绝不带时区的时间。业务键按字符串保留，Decimal参与计算，空值不会当零。
 
-`POST /api/runs` 接收sample或csv；`GET /api/runs`返回历史批次；`POST /api/runs/<id>/review`需要version与decision；`GET /api/runs/<id>/archive`返回唯一证据导出。
+`POST /api/runs` 接收sample或csv；`GET /api/runs`返回历史批次；`POST /api/runs/<id>/review`需要version与decision；`GET /api/runs/<id>/archive`返回唯一证据导出。批次负载内含closure（关账交接单），导出追加一条closure汇总行与逐文档handover行，与`/parity`页面同源。
 
 ## 范围
 
